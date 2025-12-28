@@ -1,0 +1,16 @@
+langchain
+langchain-community
+langchain-core
+langchain-nvidia-ai-endpoints
+langchain-text-splitters
+pypdf
+tiktoken
+aiofiles
+fastapi
+uvicorn
+jinja2
+python-multipart
+PyPDF2
+pinecone
+langchain-pinecone
+python-dotenv
