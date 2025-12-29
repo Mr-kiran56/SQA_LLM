@@ -474,6 +474,11 @@
 async function generateQuestions() {
     const fileInput = document.getElementById("fileInput");
     const file = fileInput.files[0];
+    const btn = document.getElementById("generateBtn");
+
+    btn.innerText = "Generate Short Answers";
+    btn.disabled = true;
+
 
     if (!file) {
         alert("Please upload a file!");
@@ -511,6 +516,7 @@ async function generateQuestions() {
     }
 
     const data = await res.json();
+   
 
     // show preview section
     document.getElementById("previewSection").classList.add("show");
@@ -527,6 +533,8 @@ async function generateQuestions() {
         div.innerText = block;
         list.appendChild(div);
     });
+    btn.innerText = "Generate Short Answers";
+    btn.disabled = false;
 }
 
 function downloadWord() {
