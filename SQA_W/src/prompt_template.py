@@ -1,21 +1,27 @@
+
 from langchain_core.prompts import PromptTemplate
+
 def prompt_temp():
-   return  PromptTemplate.from_template(
-            """You are an expert educator creating exam questions.
+    return PromptTemplate(
+        input_variables=["context", "num_questions", "words_per_answer"],
+        template="""
+You are an academic question paper generator.
 
-    Context:
-    {context}
+RULES (VERY IMPORTANT):
+- Use ONLY the information from the context
+- DO NOT use outside knowledge
+- DO NOT repeat topics
+- Answers must be EXACTLY {words_per_answer} words
+- Generate EXACTLY {num_questions} questions
 
-    Task: Generate exactly {num_questions} two-mark questions with answers from the context above.
+CONTEXT:
+{context}
 
-    Requirements:
-    - Each answer must be EXACTLY {words_per_answer} words
-    - Format each Q&A as:
-    Q1. [Question]
-    Answer: [Exactly {words_per_answer} words answer]
-    
-    Q2. [Question]
-    Answer: [Exactly {words_per_answer} words answer]
+FORMAT:
+Q1. Question text
+Answer: Answer text
 
-    Generate the questions and answers now:"""
-        )
+Q2. Question text
+Answer: Answer text
+"""
+    )

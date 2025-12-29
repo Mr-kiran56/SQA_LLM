@@ -432,11 +432,11 @@
                 <!-- Number of Questions -->
                 <div class="form-section">
                     <label>Number of Questions</label>
-                    <input type="number" id="numQuestions" min="1" max="50" value="5">
+                    <input type="number" id="numQuestions" min="1" max="50" value="20">
                 </div>
 
                 <!-- Generate Button -->
-                <button id="generateBtn" class="btn btn-primary">
+                <button id="generateBtn" onclick="generateQuestions()"  class="btn btn-primary">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                     </svg>
@@ -457,9 +457,10 @@
                 </div>
 
                 <div id="questionsList" class="questions-list"></div>
+               
 
                 <!-- Download Button -->
-                <button id="downloadBtn" class="btn btn-success">
+                <button id="downloadBtn" onclick="downloadWord()" class="btn btn-success">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
@@ -469,195 +470,69 @@
         </div>
     </div>
 
-    <script>
-        const API_BASE = 'http://localhost:8000';
-        
-        let uploadedFilePath = '';
-        let questions = [];
+<script>
+async function generateQuestions() {
+    const fileInput = document.getElementById("fileInput");
+    const file = fileInput.files[0];
 
-        const fileInput = document.getElementById('fileInput');
-        const fileLabel = document.getElementById('fileLabel');
-        const fileName = document.getElementById('fileName');
-        const uploadIcon = document.getElementById('uploadIcon');
-        const pastedText = document.getElementById('pastedText');
-        const numQuestions = document.getElementById('numQuestions');
-        const generateBtn = document.getElementById('generateBtn');
-        const previewSection = document.getElementById('previewSection');
-        const questionsList = document.getElementById('questionsList');
-        const questionCount = document.getElementById('questionCount');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const errorMessage = document.getElementById('errorMessage');
-        const errorText = document.getElementById('errorText');
+    if (!file) {
+        alert("Please upload a file!");
+        return;
+    }
 
-        function showError(message) {
-            errorText.textContent = message;
-            errorMessage.classList.add('show');
-        }
+    const allowedTypes = [
+        "text/plain",
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ];
 
-        function hideError() {
-            errorMessage.classList.remove('show');
-        }
+    if (!allowedTypes.includes(file.type)) {
+        alert("File type not allowed!");
+        return;
+    }
 
-        function setLoading(isLoading, buttonId) {
-            const button = document.getElementById(buttonId);
-            if (isLoading) {
-                button.disabled = true;
-                const spinner = document.createElement('div');
-                spinner.className = 'spinner animate-spin';
-                button.innerHTML = '';
-                button.appendChild(spinner);
-                if (buttonId === 'generateBtn') {
-                    button.appendChild(document.createTextNode(' Generating Questions...'));
-                }
-            }
-        }
+    const numQuestions = document.getElementById("numQuestions").value;
 
-        fileInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+    const formData = new FormData();
+    formData.append("uploaded_file", file);   // must match FastAPI param name
+    formData.append("nums", numQuestions);    // must match FastAPI param name
 
-            fileName.textContent = file.name;
-            hideError();
+    const res = await fetch("/generate", {
+        method: "POST",
+        body: formData
+    });
 
-            // Show loading spinner
-            uploadIcon.innerHTML = '<div class="spinner animate-spin" style="border-color: #94a3b8 transparent #94a3b8 transparent;"></div>';
-            fileLabel.classList.add('disabled');
+    if (!res.ok) {
+        const error = await res.text();
+        console.error(error);
+        alert("Error generating questions!");
+        return;
+    }
 
-            try {
-                // Read text files
-                if (file.type === 'text/plain') {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        pastedText.value = event.target.result;
-                    };
-                    reader.readAsText(file);
-                }
+    const data = await res.json();
 
-                // Upload file
-                const formData = new FormData();
-                formData.append('file', file);
+    // show preview section
+    document.getElementById("previewSection").classList.add("show");
 
-                const response = await fetch(`${API_BASE}/api/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
+    // update count
+    document.getElementById("questionCount").innerText = "Generated";
 
-                if (!response.ok) throw new Error('File upload failed');
+    // show output
+    const list = document.getElementById("questionsList");
+    list.innerHTML = "";
+    data.output.split("\n\n").forEach((block, i) => {
+        const div = document.createElement("div");
+        div.className = "question-card";
+        div.innerText = block;
+        list.appendChild(div);
+    });
+}
 
-                const data = await response.json();
-                uploadedFilePath = data.filepath;
-            } catch (err) {
-                showError(`Upload failed: ${err.message}`);
-                fileName.textContent = 'Click to upload or drag and drop';
-            } finally {
-                uploadIcon.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>';
-                fileLabel.classList.remove('disabled');
-            }
-        });
+function downloadWord() {
+    window.location.href = "/download-word";
+}
+</script>
 
-        generateBtn.addEventListener('click', async () => {
-            if (!uploadedFilePath && !pastedText.value.trim()) {
-                showError('Please upload a file or paste content first');
-                return;
-            }
-
-            hideError();
-            previewSection.classList.remove('show');
-            
-            // Show loading state
-            const originalHTML = generateBtn.innerHTML;
-            generateBtn.disabled = true;
-            generateBtn.innerHTML = '<div class="spinner animate-spin"></div><span>Generating Questions...</span>';
-
-            try {
-                let filepath = uploadedFilePath;
-
-                // Upload pasted text if no file
-                if (!filepath && pastedText.value.trim()) {
-                    const blob = new Blob([pastedText.value], { type: 'text/plain' });
-                    const formData = new FormData();
-                    formData.append('file', blob, 'pasted_content.txt');
-
-                    const uploadResponse = await fetch(`${API_BASE}/api/upload`, {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    if (!uploadResponse.ok) throw new Error('Failed to upload content');
-
-                    const uploadData = await uploadResponse.json();
-                    filepath = uploadData.filepath;
-                }
-
-                // Generate questions
-                const formData = new FormData();
-                formData.append('filepath', filepath);
-                formData.append('num_questions', numQuestions.value);
-
-                const response = await fetch(`${API_BASE}/api/generate`, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || 'Generation failed');
-                }
-
-                const data = await response.json();
-                questions = data.questions;
-                
-                // Display questions
-                displayQuestions();
-                previewSection.classList.add('show');
-            } catch (err) {
-                showError(`Generation failed: ${err.message}`);
-            } finally {
-                generateBtn.disabled = false;
-                generateBtn.innerHTML = originalHTML;
-            }
-        });
-
-        function displayQuestions() {
-            questionCount.textContent = `${questions.length} Questions`;
-            questionsList.innerHTML = '';
-
-            questions.forEach((q, index) => {
-                const card = document.createElement('div');
-                card.className = 'question-card';
-                card.innerHTML = `
-                    <div class="question-header">
-                        <span class="question-number">Q${index + 1}</span>
-                        <p class="question-text">${q.question}</p>
-                    </div>
-                    <div class="answer-section">
-                        <span class="answer-label">Answer: </span>${q.answer}
-                    </div>
-                `;
-                questionsList.appendChild(card);
-            });
-        }
-
-        downloadBtn.addEventListener('click', () => {
-            let content = "SHORT ANSWER QUESTIONS\n";
-            content += "=".repeat(50) + "\n\n";
-            
-            questions.forEach((q, index) => {
-                content += `Q${index + 1}. ${q.question}\n\n`;
-                content += `Answer: ${q.answer}\n\n`;
-                content += "-".repeat(50) + "\n\n";
-            });
-            
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'short-answers.txt';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        });
-    </script>
 </body>
 </html>
