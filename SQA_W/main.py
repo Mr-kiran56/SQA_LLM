@@ -30,29 +30,7 @@ async def index(request: Request):
 GENERATED_TEXT_FILE = "generated_questions.txt"
 GENERATED_WORD_FILE = "generated_questions.docx"
 
-# @app.post("/generate")
-# async def generate_questions_api(pdf_file: UploadFile = File(...)):
-#     base_folder = "static"
-#     os.makedirs(base_folder, exist_ok=True)
 
-#     pdf_path = os.path.join(base_folder, pdf_file.filename)
-
-#     async with aiofiles.open(pdf_path, "wb") as f:
-#         await f.write(await pdf_file.read())
-
-#     chunks = file_process(pdf_path)
-
-#     response = generate_questions(
-#         chunks,
-#         num_questions=20,
-#         words_per_answer=35
-#     )
-
-#     save_output(response, "generated_questions.txt")
-
-#     return {
-#         "output": response
-#     }
 
 
 import mimetypes
@@ -70,7 +48,7 @@ async def generate_questions_api(
     async with aiofiles.open(file_path, "wb") as f:
         await f.write(await uploaded_file.read())
 
-    # Optional: print MIME type
+    
     mime_type = uploaded_file.content_type
     print("Uploaded file type:", mime_type)
 
@@ -115,92 +93,6 @@ async def download_word():
 
 
 
-# @app.post("/upload")
-# async def chat(
-#     request: Request,
-#     pdf_file: UploadFile = File(...)):
-
-#     base_folder = "static"
-#     os.makedirs(base_folder, exist_ok=True)
-#     for filename in os.listdir(base_folder):
-#         file_path = os.path.join(base_folder, filename)
-#         if os.path.isfile(file_path):
-#             os.remove(file_path)
-#     pdf_path = os.path.join(base_folder, pdf_file.filename)
-#     async with aiofiles.open(pdf_path, "wb") as f:
-#         await f.write(await pdf_file.read())
-#     pdf_path = pdf_path.replace("\\", "/")
-#     return {
-#     "file_path": pdf_path
-# }
-
-
-
-# @app.post("/generate")
-# async def generate_qa(file_path: str = Form(...)):
-#     if not os.path.exists(file_path):
-#         raise HTTPException(status_code=404, detail="File not found")
-
-#     chunks = file_process(file_path)
-
-#     response = generate_questions(
-#         chunks,
-#         num_questions=20,
-#         words_per_answer=35
-#     )
-
-#     save_output(response, "generated_questions.txt")
-
-#     return {
-#         "status": "generated",
-#         "output": response
-#     }
-
-
-# @app.post("/upload")
-# async def chat(request: Request, pdf_file: bytes = File(), filename: str = Form(...)):
-#     base_folder = 'static/docs/'
-#     if not os.path.isdir(base_folder):
-#         os.mkdir(base_folder)
-#     pdf_filename = os.path.join(base_folder, filename)
-
-#     async with aiofiles.open(pdf_filename, 'wb') as f:
-#         await f.write(pdf_file)
- 
-#     response_data = jsonable_encoder(json.dumps({"msg": 'success',"pdf_filename": pdf_filename}))
-#     res = Response(response_data)
-#     return res
-
-
-# def get_csv(file_path):
-#     answer_generation_chain, ques_list = llm_pipeline(file_path)
-#     base_folder = 'static/output/'
-#     if not os.path.isdir(base_folder):
-#         os.mkdir(base_folder)
-#     output_file = base_folder+"QA.csv"
-#     with open(output_file, "w", newline="", encoding="utf-8") as csvfile:
-#         csv_writer = csv.writer(csvfile)
-#         csv_writer.writerow(["Question", "Answer"])  # Writing the header row
-
-#         for question in ques_list:
-#             print("Question: ", question)
-#             answer = answer_generation_chain.run(question)
-#             print("Answer: ", answer)
-#             print("--------------------------------------------------\n\n")
-
-#             # Save answer to CSV file
-#             csv_writer.writerow([question, answer])
-#     return output_file
-
-
-
-
-# @app.post("/analyze")
-# async def chat(request: Request, pdf_filename: str = Form(...)):
-#     output_file = get_csv(pdf_filename)
-#     response_data = jsonable_encoder(json.dumps({"output_file": output_file}))
-#     res = Response(response_data)
-#     return res
 
 
 

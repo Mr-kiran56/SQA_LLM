@@ -29,7 +29,6 @@ if INDEX_NAME not in pc.list_indexes().names():
 print(f"Index '{INDEX_NAME}' ready")
 
 
-# ================= MAIN FUNCTION =================
 def generate_questions(
     document_chunks,
     filename: str,
