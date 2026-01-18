@@ -24,7 +24,7 @@ pc = Pinecone(api_key=PINECONE_API_KEY)
 INDEX_NAME = "indexsample"   # ONE index, multiple namespaces
 
 if INDEX_NAME not in pc.list_indexes().names():
-    raise RuntimeError("❌ Pinecone index not found. Create it first.")
+    raise RuntimeError("Pinecone index not found. Create it first.")
 
 print(f"Index '{INDEX_NAME}' ready")
 
