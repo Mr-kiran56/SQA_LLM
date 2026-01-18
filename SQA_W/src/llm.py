@@ -70,7 +70,8 @@ def generate_questions(
     llm = ChatNVIDIA(
         model="meta/llama-3.1-8b-instruct",
         temperature=0.1,
-        api_key=NVIDIA_API_KEY
+        api_key=NVIDIA_API_KEY,
+        max_tokens=5000
     )
 
     print("LLM initialized")
