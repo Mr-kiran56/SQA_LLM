@@ -32,6 +32,7 @@ print(f"Index '{INDEX_NAME}' ready")
 def generate_questions(
     document_chunks,
     filename: str,
+    user_context:str,
     num_questions: int = 20,
     words_per_answer: int = 35
 ):
@@ -87,6 +88,7 @@ def generate_questions(
         {
             "context": retriever | format_docs,
             "num_questions": lambda _: num_questions,
+            "user_context":lambda _:user_context,
             "words_per_answer": lambda _: words_per_answer,
         }
         | prompt

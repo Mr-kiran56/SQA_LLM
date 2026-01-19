@@ -426,7 +426,7 @@
                 <!-- Text Area -->
                 <div class="form-section">
                     <label>Or Paste Your Content</label>
-                    <textarea id="pastedText" placeholder="Paste your document content here..."></textarea>
+                    <textarea id="pastedText" placeholder="Paste your document content here..." ></textarea>
                 </div>
 
                 <!-- Number of Questions -->
@@ -496,12 +496,15 @@ async function generateQuestions() {
         alert("File type not allowed!");
         return;
     }
+    
+    const User_Context=document.getElementById("pastedText").value;
 
     const numQuestions = document.getElementById("numQuestions").value;
 
     const formData = new FormData();
     formData.append("uploaded_file", file);   
     formData.append("nums", numQuestions); 
+    formData.append("User_Context",User_Context)
 
     const res = await fetch("/generate", {
         method: "POST",

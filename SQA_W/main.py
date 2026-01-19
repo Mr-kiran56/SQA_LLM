@@ -37,6 +37,7 @@ import mimetypes
 
 @app.post("/generate")
 async def generate_questions_api(
+    User_Context:str=Form(...),
     nums: int = Form(...),
     uploaded_file: UploadFile = File(...)
 ):
@@ -58,6 +59,7 @@ async def generate_questions_api(
     document_chunks=chunks,
     filename=uploaded_file.filename,
     num_questions=nums,
+    user_context=User_Context,
     words_per_answer=35
      )
 
